@@ -1,0 +1,307 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  background: #f5f7fb;
+  color: #172033;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+.app {
+  min-height: 100vh;
+}
+
+.hero {
+  background:
+    radial-gradient(circle at top right,
+      rgba(88, 122, 255, 0.35),
+      transparent 35%),
+    linear-gradient(135deg, #0d1630, #172a59);
+  color: white;
+  padding: 64px 24px;
+}
+
+.hero>div {
+  max-width: 1180px;
+  margin: auto;
+}
+
+.eyebrow {
+  display: inline-block;
+  margin-bottom: 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #b9c8ff;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3.7rem);
+}
+
+.hero p {
+  max-width: 720px;
+  margin: 18px 0 0;
+  color: #d5ddf5;
+  line-height: 1.7;
+  font-size: 1.05rem;
+}
+
+.container {
+  max-width: 1180px;
+  margin: -28px auto 0;
+  padding: 0 24px 48px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.card {
+  background: white;
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 16px 45px rgba(15, 30, 70, 0.09);
+}
+
+.card h2 {
+  margin-top: 0;
+}
+
+.field {
+  margin-bottom: 20px;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+input[type="file"],
+textarea {
+  width: 100%;
+  border: 1px solid #d9dfeb;
+  border-radius: 12px;
+  background: #fbfcff;
+}
+
+input[type="file"] {
+  padding: 14px;
+}
+
+textarea {
+  padding: 15px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+textarea:focus,
+input:focus {
+  outline: 2px solid #b8c6ff;
+  border-color: #6d86ef;
+}
+
+.file-name {
+  margin: 8px 0 0;
+  color: #65708a;
+  font-size: 0.9rem;
+}
+
+button {
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 15px;
+  background: #3157d5;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #2748b4;
+}
+
+button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.result-card {
+  position: sticky;
+  top: 24px;
+}
+
+.empty-state {
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  color: #69758e;
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid #edf0f5;
+}
+
+.result-label {
+  margin: 0 0 4px;
+  color: #78839a;
+  font-size: 0.9rem;
+}
+
+.result-header h2 {
+  margin: 0;
+  font-size: 2.5rem;
+}
+
+.badge {
+  padding: 9px 13px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.badge.strong {
+  background: #e7f8ee;
+  color: #18733e;
+}
+
+.badge.moderate {
+  background: #fff4d9;
+  color: #956900;
+}
+
+.badge.weak {
+  background: #ffe7e7;
+  color: #a42e2e;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 22px 0;
+}
+
+.metric {
+  padding: 16px;
+  border-radius: 12px;
+  background: #f7f9fd;
+}
+
+.metric span {
+  display: block;
+  color: #79849a;
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+}
+
+.metric strong {
+  font-size: 1.2rem;
+}
+
+.skills-section {
+  margin-top: 24px;
+}
+
+.skills-section h3 {
+  margin-bottom: 12px;
+  font-size: 1rem;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.tag.matched {
+  background: #eaf7ee;
+  color: #267443;
+}
+
+.tag.missing {
+  background: #fff0ef;
+  color: #a23f38;
+}
+
+.note {
+  margin-top: 26px;
+  padding: 14px;
+  border-radius: 10px;
+  background: #f4f6fb;
+  color: #647089;
+  line-height: 1.5;
+  font-size: 0.85rem;
+}
+
+.error {
+  margin-top: 18px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #ffe9e9;
+  color: #9a3434;
+}
+
+@media (max-width: 850px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .result-card {
+    position: static;
+  }
+}
+
+.recommendation {
+  margin-top: 24px;
+  padding: 18px;
+  border-radius: 12px;
+  background: #f4f7ff;
+  border: 1px solid #e1e7f5;
+}
+
+.recommendation h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.recommendation p {
+  margin: 0;
+  line-height: 1.6;
+  color: #56627a;
+}
