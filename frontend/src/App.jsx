@@ -1,6 +1,10 @@
 import { useState } from "react";
 import "./App.css";
 
+const API_BASE_URL = (
+  import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"
+).replace(/\/$/, "");
+
 function App() {
   const [resumeFile, setResumeFile] = useState(null);
   const [jobDescription, setJobDescription] = useState("");
@@ -13,7 +17,9 @@ function App() {
     e.preventDefault();
 
     if (!resumeFile || !jobDescription.trim()) {
-      setError("Please upload a resume PDF and enter a job description.");
+      setError(
+        "Please upload a resume PDF and enter a job description."
+      );
       return;
     }
 
@@ -24,23 +30,38 @@ function App() {
 
     const formData = new FormData();
     formData.append("resume", resumeFile);
-    formData.append("job_description", jobDescription);
+    formData.append("job_description", jobDescription.trim());
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/analyze", {
+      const response = await fetch(`${API_BASE_URL}/analyze`, {
         method: "POST",
         body: formData,
       });
 
-      const data = await response.json();
+      let data;
+
+      try {
+        data = await response.json();
+      } catch {
+        data = {};
+      }
 
       if (!response.ok) {
-        throw new Error(data.detail || data.error || "Analysis failed.");
+        throw new Error(
+          data.detail ||
+          data.error ||
+          `Analysis failed with status ${response.status}.`
+        );
       }
 
       setResult(data);
     } catch (err) {
-      setError(err.message || "Could not connect to the backend.");
+      console.error("Resume analysis request failed:", err);
+
+      setError(
+        err.message ||
+        "Could not connect to the analysis backend."
+      );
     } finally {
       setLoading(false);
     }
@@ -68,6 +89,8 @@ function App() {
   };
 
   const formatSkill = (skill) => {
+    if (!skill) return "";
+
     return skill
       .split(" ")
       .map((word) =>
@@ -79,16 +102,25 @@ function App() {
   };
 
   const formatSection = (section) => {
+    if (!section) return "";
+
     return section
       .replaceAll("_", " ")
       .split(" ")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .map(
+        (word) =>
+          word.charAt(0).toUpperCase() + word.slice(1)
+      )
       .join(" ");
   };
 
   const truncateText = (text, maxLength = 220) => {
     if (!text) return "";
-    if (text.length <= maxLength) return text;
+
+    if (text.length <= maxLength) {
+      return text;
+    }
+
     return `${text.slice(0, maxLength).trim()}...`;
   };
 
@@ -100,7 +132,10 @@ function App() {
     return (
       <div className="tags">
         {skills.map((skill) => (
-          <span className={`tag ${type}`} key={skill}>
+          <span
+            className={`tag ${type}`}
+            key={skill}
+          >
             {formatSkill(skill)}
           </span>
         ))}
@@ -108,7 +143,11 @@ function App() {
     );
   };
 
-  const renderRequirementGroup = (title, matched = [], missing = []) => {
+  const renderRequirementGroup = (
+    title,
+    matched = [],
+    missing = []
+  ) => {
     return (
       <div className="requirement-group">
         <h4>{title}</h4>
@@ -116,9 +155,13 @@ function App() {
         {matched.length > 0 && (
           <>
             <p className="sub-label">Matched</p>
+
             <div className="tags">
               {matched.map((skill) => (
-                <span className="tag matched" key={`matched-${skill}`}>
+                <span
+                  className="tag matched"
+                  key={`matched-${skill}`}
+                >
                   ✓ {formatSkill(skill)}
                 </span>
               ))}
@@ -128,10 +171,16 @@ function App() {
 
         {missing.length > 0 && (
           <>
-            <p className="sub-label">Not clearly demonstrated</p>
+            <p className="sub-label">
+              Not clearly demonstrated
+            </p>
+
             <div className="tags">
               {missing.map((skill) => (
-                <span className="tag missing" key={`missing-${skill}`}>
+                <span
+                  className="tag missing"
+                  key={`missing-${skill}`}
+                >
                   ○ {formatSkill(skill)}
                 </span>
               ))}
@@ -139,18 +188,20 @@ function App() {
           </>
         )}
 
-        {matched.length === 0 && missing.length === 0 && (
-          <p className="muted-text">
-            No recognized requirements in this group.
-          </p>
-        )}
+        {matched.length === 0 &&
+          missing.length === 0 && (
+            <p className="muted-text">
+              No recognized requirements in this group.
+            </p>
+          )}
       </div>
     );
   };
 
   const renderAlternativeRequirements = () => {
     const alternatives =
-      result?.requirement_analysis?.alternative_requirements || [];
+      result?.requirement_analysis
+        ?.alternative_requirements || [];
 
     if (alternatives.length === 0) {
       return null;
@@ -166,7 +217,9 @@ function App() {
             key={`${requirement.skills.join("-")}-${index}`}
           >
             <p className="alternative-title">
-              {requirement.skills.map(formatSkill).join(" OR ")}
+              {requirement.skills
+                .map(formatSkill)
+                .join(" OR ")}
             </p>
 
             <p
@@ -177,7 +230,9 @@ function App() {
               }
             >
               {requirement.satisfied
-                ? `Satisfied by: ${requirement.matched
+                ? `Satisfied by: ${(
+                  requirement.matched || []
+                )
                   .map(formatSkill)
                   .join(", ")}`
                 : "Not demonstrated"}
@@ -231,9 +286,11 @@ function App() {
           item.level === "required" ||
           item.level === "preferred"
       )
+      .slice()
       .sort((a, b) => {
         const priorityDifference =
-          getEvidencePriority(a) - getEvidencePriority(b);
+          getEvidencePriority(a) -
+          getEvidencePriority(b);
 
         if (priorityDifference !== 0) {
           return priorityDifference;
@@ -253,13 +310,16 @@ function App() {
     <div className="app">
       <section className="hero">
         <div>
-          <span className="eyebrow">AI Resume Intelligence</span>
+          <span className="eyebrow">
+            AI Resume Intelligence
+          </span>
 
           <h1>Resume–Job Match Analyzer</h1>
 
           <p>
-            Analyze candidate-job alignment using transformer embeddings,
-            weighted job requirements, skill-gap detection, and resume
+            Analyze candidate-job alignment using
+            transformer embeddings, weighted job
+            requirements, skill-gap detection, and resume
             evidence retrieval.
           </p>
         </div>
@@ -272,14 +332,20 @@ function App() {
 
             <form onSubmit={handleSubmit}>
               <div className="field">
-                <label>Resume PDF</label>
+                <label htmlFor="resume">
+                  Resume PDF
+                </label>
 
                 <input
+                  id="resume"
                   type="file"
                   accept=".pdf,application/pdf"
-                  onChange={(e) =>
-                    setResumeFile(e.target.files?.[0] || null)
-                  }
+                  onChange={(e) => {
+                    setResumeFile(
+                      e.target.files?.[0] || null
+                    );
+                    setError("");
+                  }}
                 />
 
                 {resumeFile && (
@@ -290,24 +356,37 @@ function App() {
               </div>
 
               <div className="field">
-                <label>Job Description</label>
+                <label htmlFor="job-description">
+                  Job Description
+                </label>
 
                 <textarea
+                  id="job-description"
                   rows="14"
                   placeholder="Paste the job description here..."
                   value={jobDescription}
-                  onChange={(e) =>
-                    setJobDescription(e.target.value)
-                  }
+                  onChange={(e) => {
+                    setJobDescription(
+                      e.target.value
+                    );
+                    setError("");
+                  }}
                 />
               </div>
 
-              <button type="submit" disabled={loading}>
-                {loading ? "Analyzing..." : "Analyze Match"}
+              <button
+                type="submit"
+                disabled={loading}
+              >
+                {loading
+                  ? "Analyzing..."
+                  : "Analyze Match"}
               </button>
             </form>
 
-            {error && <div className="error">{error}</div>}
+            {error && (
+              <div className="error">{error}</div>
+            )}
           </section>
 
           <section className="card result-card">
@@ -316,8 +395,9 @@ function App() {
                 <h2>Match Analysis</h2>
 
                 <p>
-                  Upload a resume and job description to view semantic
-                  alignment, requirement coverage, skill gaps, and supporting
+                  Upload a resume and job description to
+                  view semantic alignment, requirement
+                  coverage, skill gaps, and supporting
                   resume evidence.
                 </p>
               </div>
@@ -325,10 +405,15 @@ function App() {
               <>
                 <div className="result-header">
                   <div>
-                    <p className="result-label">Overall Match</p>
+                    <p className="result-label">
+                      Overall Match
+                    </p>
 
                     <h2>
-                      {Number(result.overall_score).toFixed(1)}%
+                      {Number(
+                        result.overall_score
+                      ).toFixed(1)}
+                      %
                     </h2>
                   </div>
 
@@ -346,7 +431,10 @@ function App() {
                     <span>Semantic Alignment</span>
 
                     <strong>
-                      {Number(result.semantic_score).toFixed(1)}%
+                      {Number(
+                        result.semantic_score
+                      ).toFixed(1)}
+                      %
                     </strong>
                   </div>
 
@@ -354,7 +442,8 @@ function App() {
                     <span>Requirement Match</span>
 
                     <strong>
-                      {result.weighted_skill_score !== null
+                      {result.weighted_skill_score !==
+                        null
                         ? `${Number(
                           result.weighted_skill_score
                         ).toFixed(1)}%`
@@ -366,7 +455,8 @@ function App() {
                     <span>Section Evidence</span>
 
                     <strong>
-                      {result.section_evidence_score !== null
+                      {result.section_evidence_score !==
+                        null
                         ? `${Number(
                           result.section_evidence_score
                         ).toFixed(1)}%`
@@ -383,20 +473,26 @@ function App() {
                           Requirement Analysis
                         </p>
 
-                        <h3>Job Requirement Coverage</h3>
+                        <h3>
+                          Job Requirement Coverage
+                        </h3>
                       </div>
                     </div>
 
                     {renderRequirementGroup(
                       "Core Requirements",
-                      result.requirement_analysis.required?.matched || [],
-                      result.requirement_analysis.required?.missing || []
+                      result.requirement_analysis
+                        .required?.matched || [],
+                      result.requirement_analysis
+                        .required?.missing || []
                     )}
 
                     {renderRequirementGroup(
                       "Preferred Skills",
-                      result.requirement_analysis.preferred?.matched || [],
-                      result.requirement_analysis.preferred?.missing || []
+                      result.requirement_analysis
+                        .preferred?.matched || [],
+                      result.requirement_analysis
+                        .preferred?.missing || []
                     )}
 
                     {renderAlternativeRequirements()}
@@ -407,7 +503,10 @@ function App() {
                   <section className="analysis-section">
                     <div className="section-heading evidence-heading">
                       <div>
-                        <p className="section-kicker">Semantic Search</p>
+                        <p className="section-kicker">
+                          Semantic Search
+                        </p>
+
                         <h3>Resume Evidence</h3>
                       </div>
                     </div>
@@ -415,26 +514,43 @@ function App() {
                     {result.evidence_summary && (
                       <div className="evidence-summary">
                         <span>
-                          {result.evidence_summary.strong} strong
+                          {
+                            result.evidence_summary
+                              .strong
+                          }{" "}
+                          strong
                         </span>
 
                         <span>
-                          {result.evidence_summary.moderate} moderate
+                          {
+                            result.evidence_summary
+                              .moderate
+                          }{" "}
+                          moderate
                         </span>
 
                         <span>
-                          {result.evidence_summary.weak} limited
+                          {
+                            result.evidence_summary
+                              .weak
+                          }{" "}
+                          limited
                         </span>
 
                         <span>
-                          {result.evidence_summary.very_weak} unclear
+                          {
+                            result.evidence_summary
+                              .very_weak
+                          }{" "}
+                          unclear
                         </span>
                       </div>
                     )}
 
                     <div className="evidence-list">
                       {visibleEvidence.map((item) => {
-                        const evidence = item.evidence?.[0];
+                        const evidence =
+                          item.evidence?.[0];
 
                         return (
                           <article
@@ -444,11 +560,16 @@ function App() {
                             <div className="evidence-top">
                               <div>
                                 <h4>
-                                  {formatSkill(item.requirement)}
+                                  {formatSkill(
+                                    item.requirement
+                                  )}
                                 </h4>
 
                                 <p className="evidence-meta">
-                                  {formatSection(item.level)} requirement
+                                  {formatSection(
+                                    item.level
+                                  )}{" "}
+                                  requirement
                                 </p>
                               </div>
 
@@ -476,15 +597,18 @@ function App() {
                                   : "○ No explicit skill mention"}
                               </span>
 
-                              {item.best_evidence_score !== null && (
-                                <span className="evidence-score">
-                                  Semantic evidence:{" "}
-                                  {Number(
-                                    item.best_evidence_score
-                                  ).toFixed(1)}
-                                  %
-                                </span>
-                              )}
+                              {item.best_evidence_score !==
+                                null &&
+                                item.best_evidence_score !==
+                                undefined && (
+                                  <span className="evidence-score">
+                                    Semantic evidence:{" "}
+                                    {Number(
+                                      item.best_evidence_score
+                                    ).toFixed(1)}
+                                    %
+                                  </span>
+                                )}
                             </div>
 
                             {evidence ? (
@@ -499,13 +623,17 @@ function App() {
                                 </p>
 
                                 <p className="evidence-text">
-                                  “{truncateText(evidence.text)}”
+                                  “
+                                  {truncateText(
+                                    evidence.text
+                                  )}
+                                  ”
                                 </p>
                               </div>
                             ) : (
                               <p className="muted-text">
-                                No supporting resume evidence was
-                                retrieved.
+                                No supporting resume
+                                evidence was retrieved.
                               </p>
                             )}
                           </article>
@@ -534,51 +662,73 @@ function App() {
                 <section className="analysis-section">
                   <div className="section-heading">
                     <div>
-                      <p className="section-kicker">Skills</p>
-                      <h3>Explicitly Matched Skills</h3>
+                      <p className="section-kicker">
+                        Skills
+                      </p>
+
+                      <h3>
+                        Explicitly Matched Skills
+                      </h3>
                     </div>
                   </div>
 
-                  {renderSkillTags(result.matched_skills, "matched")}
+                  {renderSkillTags(
+                    result.matched_skills,
+                    "matched"
+                  )}
                 </section>
 
-                {result.resume_sections_detected?.length > 0 && (
-                  <section className="analysis-section">
-                    <div className="section-heading">
-                      <div>
-                        <p className="section-kicker">
-                          Resume Structure
-                        </p>
+                {result.resume_sections_detected
+                  ?.length > 0 && (
+                    <section className="analysis-section">
+                      <div className="section-heading">
+                        <div>
+                          <p className="section-kicker">
+                            Resume Structure
+                          </p>
 
-                        <h3>Detected Sections</h3>
+                          <h3>Detected Sections</h3>
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="tags">
-                      {result.resume_sections_detected.map((section) => (
-                        <span className="tag neutral" key={section}>
-                          {formatSection(section)}
-                        </span>
-                      ))}
-                    </div>
-                  </section>
-                )}
+                      <div className="tags">
+                        {result.resume_sections_detected.map(
+                          (section) => (
+                            <span
+                              className="tag neutral"
+                              key={section}
+                            >
+                              {formatSection(section)}
+                            </span>
+                          )
+                        )}
+                      </div>
+                    </section>
+                  )}
 
                 <div className="recommendation">
                   <h3>Recommendation</h3>
+
                   <p>{result.recommendation}</p>
                 </div>
 
                 <div className="note">
-                  This analysis combines transformer semantic similarity,
-                  weighted requirement matching, and resume section evidence.
-                  It is an explainable engineering heuristic, not a hiring
-                  probability or an official ATS score.
+                  This analysis combines transformer
+                  semantic similarity, weighted requirement
+                  matching, and resume section evidence. It
+                  is an explainable engineering heuristic,
+                  not a hiring probability or an official
+                  ATS score.
                 </div>
 
                 <div className="api-meta">
-                  <span>Model: {result.model_name}</span>
-                  <span>API v{result.api_version}</span>
+                  <span>
+                    Model: {result.model_name}
+                  </span>
+
+                  <span>
+                    API v{result.api_version}
+                  </span>
                 </div>
               </>
             )}

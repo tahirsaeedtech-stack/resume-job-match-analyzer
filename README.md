@@ -6,6 +6,29 @@ The application accepts a **PDF resume** and a **job description**, identifies i
 
 > **Note:** This is a candidate-facing resume analysis and portfolio application. It is not an automated hiring or rejection system.
 
+## 🚀 Live Demo
+
+**Application:** https://resume-job-match-analyzer-liart.vercel.app
+
+The production application uses:
+
+- **Frontend:** React + Vite deployed on Vercel
+- **Backend:** FastAPI deployed on Google Cloud Run
+- **AI/NLP:** Sentence Transformers (`all-MiniLM-L6-v2`)
+- **Containerization:** Docker
+- **CI/CD:** GitHub-connected Vercel deployment
+
+### Production Architecture
+
+React / Vite (Vercel)
+        ↓
+FastAPI REST API (Google Cloud Run)
+        ↓
+Sentence Transformer
+        ↓
+Requirement Analysis + Semantic Evidence Retrieval
+        ↓
+Explainable Resume–Job Match Results
 ---
 
 ## 🚀 Application Preview
@@ -409,8 +432,6 @@ The system is intended for **resume self-assessment and skill-gap analysis**, no
 - CrossEncoder reranking
 - PostgreSQL / pgvector integration
 - Improved experience and project analysis
-- Docker containerization
-- Production cloud deployment
 - GitHub Actions CI
 
 ---
