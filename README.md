@@ -1,289 +1,208 @@
 # AI Resume–Job Match & Skill Gap Analyzer
 
-An end-to-end AI/NLP application that analyzes the alignment between a candidate's resume and a job description using transformer-based semantic embeddings and explicit skill matching.
+An end-to-end **AI/NLP application** that analyzes how well a candidate's resume aligns with a job description using **transformer embeddings, requirement-aware skill matching, resume section analysis, and semantic evidence retrieval**.
 
-The application accepts a **PDF resume** and a **job description**, extracts resume text, calculates semantic similarity, identifies matched and missing skills, and produces an interpretable overall match score with actionable recommendations.
+The application accepts a **PDF resume** and a **job description**, identifies important job requirements, evaluates demonstrated and missing skills, retrieves supporting resume evidence, and produces an explainable match analysis.
 
----
-
-## Project Overview
-
-Traditional keyword matching can miss meaningful relationships between a resume and a job description when the wording is different.
-
-This project combines two approaches:
-
-1. **Semantic Matching** — understands contextual similarity using transformer embeddings.
-2. **Skill Gap Analysis** — identifies explicit technical skills shared between the resume and job description.
-
-The result is a hybrid resume–job alignment system that provides more information than a simple keyword matcher.
+> **Note:** This is a candidate-facing resume analysis and portfolio application. It is not an automated hiring or rejection system.
 
 ---
 
-## Application Preview
+## 🚀 Application Preview
 
 ![AI Resume Job Match Analyzer](docs/images/resume-match-result.png)
 
 ---
 
-## Key Features
+## ✨ Key Features
 
-- PDF resume upload
-- Automatic PDF text extraction
-- Transformer-based sentence embeddings
-- Semantic similarity scoring
+- PDF resume upload and text extraction
+- Transformer-based semantic matching
 - Technical skill extraction and normalization
-- Matched skill identification
-- Missing skill / skill-gap analysis
-- Hybrid overall match score
-- Strong / Moderate / Weak match classification
-- Actionable resume recommendations
-- FastAPI REST backend
+- Required, preferred, and optional requirement detection
+- Alternative requirement handling such as `AWS OR Azure OR GCP`
+- Weighted requirement coverage
+- Matched and missing skill analysis
+- Resume section detection
+- Section-level semantic analysis
+- Semantic resume evidence retrieval
+- Explicit skill mention verification
+- Evidence strength classification
+- Explainable overall match score
+- Candidate-facing recommendations
+- FastAPI REST API
 - React + Vite frontend
-- Responsive user interface
-- Privacy-conscious design with no resume persistence
+- Automated backend tests
+- Privacy-conscious resume processing
 
 ---
 
-## AI / NLP Approach
+## 🧠 How It Works
 
-### 1. Resume Text Extraction
-
-The uploaded PDF resume is processed using `pypdf`.
-
-The extracted text becomes the input to the NLP matching pipeline.
+The application combines semantic NLP with structured requirement analysis.
 
 ```text
-PDF Resume
-    ↓
-Text Extraction
-    ↓
-Resume Text
+PDF Resume + Job Description
+            ↓
+      Text Extraction
+            ↓
+      Text Normalization
+            ↓
+   ┌────────┴─────────┐
+   ↓                  ↓
+Skill Extraction   Requirement Analysis
+                      ↓
+             Required / Preferred /
+                  Optional
+   └────────┬─────────┘
+            ↓
+    Transformer Embeddings
+            ↓
+      Semantic Matching
+            ↓
+     Resume Section Analysis
+            ↓
+      Resume Chunking
+            ↓
+ Semantic Evidence Retrieval
+            ↓
+   Explainable Match Result
 ```
 
 ---
 
-### 2. Transformer Embeddings
+## 🤖 Transformer-Based Semantic Matching
 
-The application uses:
+The semantic layer uses:
 
 ```text
 sentence-transformers/all-MiniLM-L6-v2
 ```
 
-from the Sentence Transformers ecosystem.
+The model converts the resume and job description into dense vector representations. Cosine similarity is then used to measure their semantic alignment.
 
-The resume and job description are transformed into dense numerical vector representations.
+This allows the system to detect contextual similarity even when the resume and job description use different wording.
 
-```text
-Resume Text ───────→ Sentence Transformer ───────→ Resume Embedding
-
-Job Description ──→ Sentence Transformer ───────→ Job Embedding
-```
-
-These embeddings capture semantic information beyond exact keyword overlap.
+The semantic score represents **textual alignment — not hiring probability**.
 
 ---
 
-### 3. Semantic Similarity
+## 🎯 Requirement-Aware Analysis
 
-Cosine similarity is calculated between the resume embedding and job-description embedding.
+Not every requirement in a job description has equal importance.
 
-Conceptually:
+The application classifies recognized requirements into:
+
+| Requirement | Weight |
+|---|---:|
+| Required | 1.00 |
+| Preferred | 0.65 |
+| Optional | 0.35 |
+
+For example:
 
 ```text
-Resume Embedding
-       ↓
-Cosine Similarity
-       ↑
-Job Embedding
+"Must have experience with Python."
+→ Required
+
+"Experience with FastAPI is preferred."
+→ Preferred
+
+"Cloud experience is beneficial."
+→ Optional
 ```
 
-A higher similarity indicates stronger semantic alignment between the supplied texts.
+The system also supports alternative requirements such as:
 
-The semantic score is an **alignment score**, not a probability that a candidate will be hired.
+```text
+AWS OR Azure OR GCP
+```
+
+so alternatives can be treated as a group rather than incorrectly requiring every listed technology.
 
 ---
 
-### 4. Skill Extraction
+## 🔎 Semantic Evidence Retrieval
 
-The application also maintains a normalized technical skill taxonomy covering areas such as:
-
-- Python
-- Pandas
-- NumPy
-- Scikit-learn
-- TensorFlow
-- PyTorch
-- Machine Learning
-- NLP
-- Transformers
-- Hugging Face
-- Embeddings
-- LLMs
-- RAG
-- FastAPI
-- Flask
-- Django
-- React
-- SQL
-- PostgreSQL
-- MongoDB
-- Docker
-- Kubernetes
-- Git
-- GitHub
-- AWS
-- Azure
-- GCP
-- Spark
-- Airflow
-- ETL
-- Data Analysis
-- Data Visualization
-
-Aliases are normalized into canonical skill names before comparison.
-
-The system then determines:
+Instead of returning only a match percentage, the application retrieves resume evidence for individual job requirements.
 
 ```text
-Matched Skills = Resume Skills ∩ Job Skills
-
-Missing Skills = Job Skills - Resume Skills
+Job Requirement
+      ↓
+Semantic Query
+      ↓
+Resume Chunks
+      ↓
+Similarity Ranking
+      ↓
+Best Supporting Evidence
 ```
+
+For each requirement, the application can report:
+
+- requirement level
+- semantic evidence score
+- best matching resume section
+- supporting resume text
+- explicit skill mention status
+- evidence strength
+
+Evidence is presented as:
+
+- **Strong Evidence**
+- **Moderate Evidence**
+- **Limited Evidence**
+- **No Clear Evidence**
+
+Semantic similarity is kept separate from explicit skill matching. Related text therefore does not automatically prove that a candidate possesses a specific skill.
 
 ---
 
-## Hybrid Match Score
+## 📊 Explainable Match Analysis
 
-When explicit job skills are successfully recognized, the overall score combines:
-
-```text
-60% Semantic Similarity
-+
-40% Skill Coverage
-```
-
-Conceptually:
+The overall analysis combines:
 
 ```text
-Overall Match =
-(0.60 × Semantic Score)
-+
-(0.40 × Skill Match Score)
+Semantic Alignment
+        +
+Weighted Requirement Coverage
+        +
+Resume Section Evidence
 ```
 
-For the current MVP, match levels are interpreted as:
+The UI also explains the result through:
 
-| Overall Score | Match Level |
-|---|---|
-| 80% and above | Strong Match |
-| 65% – 79.99% | Moderate Match |
-| Below 65% | Weak Match |
+- matched skills
+- missing required skills
+- missing preferred skills
+- alternative requirements
+- supporting resume evidence
+- detected resume sections
+- candidate-facing recommendations
 
-These weights and thresholds are **MVP heuristics** rather than scientifically calibrated hiring thresholds.
+Current match categories include:
 
-### Skill-analysis fallback
+```text
+Strong Match
+Good Match
+Partial Match
+Weak Match
+```
 
-If the current skill taxonomy cannot identify sufficient explicit skills from the job description, the application does **not** artificially assign a 0% skill score.
-
-Instead:
-
-- Skill Match is shown as `N/A`
-- The overall result falls back to semantic similarity
-- The UI explains that explicit skill analysis was unavailable
-
-This prevents missing taxonomy coverage from unfairly lowering the displayed alignment score.
+The scoring system is an **engineering heuristic** and has not been calibrated against real hiring outcomes.
 
 ---
 
-## Recommendation Engine
-
-The application generates a concise recommendation based on:
-
-- overall match level
-- semantic alignment
-- detected missing skills
-- availability of skill-gap analysis
-
-For example, a moderate match may recommend strengthening evidence for specific missing technical skills.
-
-The recommendation layer is deterministic and is kept separate from the transformer-based semantic scoring.
-
----
-
-## System Architecture
-
-```text
-                    ┌───────────────────────┐
-                    │     React Frontend    │
-                    │                       │
-                    │  Resume PDF Upload    │
-                    │  Job Description      │
-                    └───────────┬───────────┘
-                                │
-                                │ HTTP / FormData
-                                ▼
-                    ┌───────────────────────┐
-                    │    FastAPI Backend    │
-                    └───────────┬───────────┘
-                                │
-             ┌──────────────────┴──────────────────┐
-             │                                     │
-             ▼                                     ▼
-    ┌──────────────────┐                  ┌──────────────────┐
-    │ PDF Text         │                  │ Job Description  │
-    │ Extraction       │                  │ Processing       │
-    └────────┬─────────┘                  └────────┬─────────┘
-             │                                     │
-             └──────────────────┬──────────────────┘
-                                ▼
-                 ┌─────────────────────────────┐
-                 │ Sentence Transformer Model  │
-                 │ all-MiniLM-L6-v2            │
-                 └──────────────┬──────────────┘
-                                ▼
-                    ┌───────────────────────┐
-                    │ Semantic Similarity   │
-                    └───────────┬───────────┘
-                                │
-             ┌──────────────────┴──────────────────┐
-             │                                     │
-             ▼                                     ▼
-    ┌──────────────────┐                  ┌──────────────────┐
-    │ Resume Skill     │                  │ Job Skill        │
-    │ Extraction       │                  │ Extraction       │
-    └────────┬─────────┘                  └────────┬─────────┘
-             │                                     │
-             └──────────────────┬──────────────────┘
-                                ▼
-                    ┌───────────────────────┐
-                    │ Skill Gap Analysis    │
-                    └───────────┬───────────┘
-                                ▼
-                    ┌───────────────────────┐
-                    │ Hybrid Scoring        │
-                    │ + Recommendation      │
-                    └───────────┬───────────┘
-                                ▼
-                    ┌───────────────────────┐
-                    │ React Results UI      │
-                    └───────────────────────┘
-```
-
----
-
-## Technology Stack
+## 🛠️ Technology Stack
 
 ### AI / NLP
-
 - Sentence Transformers
-- Hugging Face model ecosystem
+- Hugging Face ecosystem
 - Scikit-learn
 - NumPy
-- Cosine similarity
+- Semantic similarity and retrieval
 
 ### Backend
-
 - Python
 - FastAPI
 - Uvicorn
@@ -291,15 +210,20 @@ The recommendation layer is deterministic and is kept separate from the transfor
 - python-multipart
 
 ### Frontend
-
 - React
 - Vite
 - JavaScript
 - CSS
 
+### Testing & Version Control
+- Pytest
+- FastAPI TestClient
+- Git
+- GitHub
+
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```text
 resume-job-match-analyzer/
@@ -311,28 +235,28 @@ resume-job-match-analyzer/
 │   ├── src/
 │   │   ├── App.jsx
 │   │   ├── App.css
-│   │   └── index.css
-│   ├── package.json
-│   └── ...
+│   │   ├── index.css
+│   │   └── main.jsx
+│   └── package.json
 │
 ├── notebooks/
 │   └── 01_semantic_matching.ipynb
 │
-├── data/
-│   └── samples/
+├── tests/
+│   └── test_api.py
 │
 ├── docs/
 │   └── images/
 │       └── resume-match-result.png
 │
-├── .gitignore
 ├── requirements.txt
+├── .gitignore
 └── README.md
 ```
 
 ---
 
-## API
+## 🔌 API
 
 ### Health Check
 
@@ -359,90 +283,96 @@ Inputs:
 - `resume` — PDF resume
 - `job_description` — job-description text
 
-Example response:
+The API returns structured information including:
 
-```json
-{
-  "semantic_score": 76.42,
-  "skill_match_score": 71.43,
-  "overall_score": 74.42,
-  "match_level": "Moderate Match",
-  "matched_skills": [
-    "python",
-    "machine learning",
-    "scikit-learn",
-    "fastapi"
-  ],
-  "missing_skills": [
-    "docker",
-    "aws"
-  ],
-  "skill_analysis_available": true,
-  "recommendation": "Good overall fit, but strengthen the resume by demonstrating experience with: docker, aws."
-}
+```text
+semantic_score
+weighted_skill_score
+section_evidence_score
+overall_score
+match_level
+matched_skills
+missing_skills
+requirement_analysis
+requirement_evidence
+evidence_summary
+resume_sections_detected
+recommendation
 ```
 
 ---
 
-## Local Installation
+## 🧪 Automated Tests
+
+The project includes automated tests covering:
+
+- API health endpoint
+- invalid non-PDF uploads
+- empty job descriptions
+- normalized ML skill extraction
+- required requirement classification
+- preferred requirement classification
+- alternative cloud requirement grouping
+
+Run:
+
+```bash
+python -m pytest tests/test_api.py -v
+```
+
+Current test suite:
+
+```text
+7 passed
+```
+
+---
+
+## 💻 Run Locally
 
 ### 1. Clone the repository
 
 ```bash
-git clone <your-repository-url>
+git clone https://github.com/tahirsaeedtech-stack/resume-job-match-analyzer.git
 cd resume-job-match-analyzer
 ```
 
-### 2. Create a Python virtual environment
-
-Windows:
+### 2. Create and activate a virtual environment
 
 ```powershell
 python -m venv .venv
+.\.venv\Scripts\activate
 ```
 
 ### 3. Install backend dependencies
 
 ```powershell
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
-### 4. Start the FastAPI backend
-
-From the project root:
+### 4. Start the backend
 
 ```powershell
-.\.venv\Scripts\python.exe -m uvicorn backend.main:app --reload
+python -m uvicorn backend.main:app --reload
 ```
 
-The API will run at:
-
-```text
-http://127.0.0.1:8000
-```
-
-Interactive API documentation:
+Swagger API documentation:
 
 ```text
 http://127.0.0.1:8000/docs
 ```
 
-### 5. Install frontend dependencies
+### 5. Start the frontend
 
 Open another terminal:
 
 ```powershell
 cd frontend
 npm install
-```
-
-### 6. Start the React frontend
-
-```powershell
 npm run dev
 ```
 
-The frontend will typically run at:
+The frontend typically runs at:
 
 ```text
 http://localhost:5173
@@ -450,112 +380,56 @@ http://localhost:5173
 
 ---
 
-## Validation
+## ⚠️ Limitations
 
-The matching pipeline was manually validated using deliberately different resume/job pairs representing:
-
-- strong alignment
-- moderate alignment
-- weak/unrelated alignment
-
-The baseline tests showed the expected ordering, with closely aligned ML profiles receiving substantially higher scores than unrelated profiles.
-
-This validation demonstrates basic behavioral consistency but should **not** be interpreted as a formal benchmark of hiring accuracy.
+- Skill extraction uses a curated taxonomy, so unknown skills may not be detected.
+- Requirement classification uses engineering rules and may not perfectly interpret every job description.
+- Semantic similarity does not prove real-world experience with a skill.
+- Scanned/image-only resumes may require OCR.
+- Match scores are not calibrated hiring probabilities or official ATS scores.
 
 ---
 
-## Important Limitations
+## 🔐 Privacy & Responsible AI
 
-This project is an AI/NLP portfolio application and has several important limitations.
+Uploaded resumes may contain sensitive personal information.
 
-### Skill taxonomy
+The application is designed to process resume content without intentionally persisting uploaded PDF files. Real candidate resumes should never be committed to the public repository.
 
-Skill extraction currently uses a curated taxonomy and aliases. Skills outside this taxonomy may not be recognized.
-
-### Long documents
-
-`all-MiniLM-L6-v2` has a limited input length. Very long resumes or job descriptions may require section-based or chunk-based embedding strategies for more complete semantic representation.
-
-### Heuristic scoring
-
-The 60/40 weighting and Strong/Moderate/Weak thresholds are application-level heuristics and have not been calibrated against real hiring outcomes.
-
-### PDF extraction
-
-The current implementation is designed primarily for text-based PDF resumes. Image-only or scanned resumes may require OCR.
-
-### Semantic similarity is not hiring probability
-
-A high semantic score means the supplied resume text is semantically similar to the supplied job description.
-
-It does **not** mean that the candidate has the same probability of being hired.
+The system is intended for **resume self-assessment and skill-gap analysis**, not automated employment decisions. Human judgment remains necessary in real hiring processes.
 
 ---
 
-## Responsible AI & Fairness
+## 🔮 Future Improvements
 
-This application is designed as a **resume–job alignment and skill-gap analysis tool**, not an automated hiring or rejection system.
-
-It does not intentionally use or score protected personal characteristics.
-
-The system should not be used as a substitute for human judgment in employment decisions.
-
-Results can also reflect:
-
-- limitations in the skill taxonomy
-- wording differences
-- missing resume information
-- biases or omissions present in job descriptions
-- limitations of the underlying embedding model
-
-The application therefore presents its outputs as alignment indicators rather than employment decisions.
-
----
-
-## Privacy
-
-Resumes may contain sensitive personal information.
-
-The application is designed to process uploaded resume content for analysis without intentionally persisting the uploaded PDF.
-
-Real candidate resumes should never be committed to the public repository.
-
-The `.gitignore` configuration excludes PDF files and local upload directories to reduce the risk of accidentally publishing resume data.
-
----
-
-## Future Improvements
-
-Potential extensions include:
-
-- section-aware resume parsing
-- chunked semantic embeddings for long documents
-- larger and externally maintained skill taxonomies
-- experience-level matching
-- education and certification extraction
-- weighted required vs preferred skills
-- batch resume ranking
+- Formal labeled evaluation dataset
+- Scoring calibration
+- Hybrid exact-match + semantic evidence ranking
+- Improved requirement extraction
 - CrossEncoder reranking
-- configurable job-specific skill weights
-- calibrated evaluation using a larger labeled dataset
-- cloud deployment
+- PostgreSQL / pgvector integration
+- Improved experience and project analysis
+- Docker containerization
+- Production cloud deployment
+- GitHub Actions CI
 
 ---
 
-## What This Project Demonstrates
+## 💡 What This Project Demonstrates
 
-This project demonstrates practical experience with:
+This project demonstrates hands-on experience with:
 
-- Natural Language Processing
-- Transformer-based embeddings
-- Semantic similarity
-- Feature/scoring design
-- Skill extraction and normalization
-- Responsible AI considerations
-- FastAPI REST API development
-- React frontend development
-- PDF processing
-- Full-stack AI application integration
+**NLP • Transformer Embeddings • Semantic Search • Explainable AI • Requirement-Aware Scoring • FastAPI • React • REST APIs • Pytest • Full-Stack AI Application Development**
+
+---
+
+## 📌 Current Version
+
+```text
+API Version: 2.3.0
+Embedding Model: sentence-transformers/all-MiniLM-L6-v2
+Automated Tests: 7 passing
+```
 
 ---
 
@@ -563,4 +437,4 @@ This project demonstrates practical experience with:
 
 This project is intended for educational, portfolio, and candidate-facing resume analysis purposes.
 
-The generated scores represent textual and skill alignment between supplied documents. They should not be interpreted as predictions of hiring success or as automated employment decisions.
+Generated scores represent textual, skill, requirement, and resume-evidence alignment. They should **not** be interpreted as predictions of hiring success, official ATS scores, or automated employment decisions.
